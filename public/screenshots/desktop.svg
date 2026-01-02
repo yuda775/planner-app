@@ -1,0 +1,8 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#f0f0f0"/>
+  <rect x="0" y="0" width="250" height="720" fill="#35495e"/>
+  <rect x="300" y="50" width="930" height="100" rx="8" fill="#42b883"/>
+  <rect x="300" y="200" width="450" height="300" rx="8" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="780" y="200" width="450" height="300" rx="8" fill="#ffffff" stroke="#e0e0e0"/>
+  <text x="765" y="110" font-family="Arial" font-size="30" fill="white" text-anchor="middle">Vue Capacitor Dashboard</text>
+</svg>
