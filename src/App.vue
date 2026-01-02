@@ -89,7 +89,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup vapor>
 import { ref, computed, onMounted, toRaw } from 'vue';
 import { initDB } from './db';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -231,25 +231,25 @@ const saveReminder = async () => {
       await LocalNotifications.cancel({ notifications: [{ id: rawTodo.notificationId }] });
     }
 
-    // 2. Schedule new
-    // Generate a numeric ID for the notification (RxDB uses UUID string, LocalNotifications needs int)
-    // Simple hash or random int. collision unlikely for personal todo list
+    // 3. Schedule new
+    // Generate a numeric ID for the notification
     const newNotifId = Math.floor(Math.random() * 100000000);
 
+    const notificationPayload = {
+      title: "Todo Reminder",
+      body: rawTodo.text,
+      id: newNotifId,
+      schedule: { at: new Date(triggerTime) }
+    };
+
+    // Only add extra fields if they exist to avoid validation errors on some platforms
+    if (rawTodo.sound) notificationPayload.sound = rawTodo.sound;
+
     await LocalNotifications.schedule({
-      notifications: [{
-        title: "Todo Reminder",
-        body: rawTodo.text,
-        id: newNotifId,
-        schedule: { at: new Date(triggerTime) },
-        sound: null,
-        attachments: null,
-        actionTypeId: "",
-        extra: null
-      }]
+      notifications: [notificationPayload]
     });
 
-    // 3. Update DB
+    // 4. Update DB
     await rawTodo.incrementalPatch({
       notificationId: newNotifId,
       reminderTime: triggerTime
@@ -257,8 +257,13 @@ const saveReminder = async () => {
 
     closeModal();
   } catch (err) {
-    console.error("Scheduling failed", err);
-    alert("Failed to schedule notification");
+    console.error("Scheduling failed details:", err);
+    // Specific check for Web Permission issues
+    if (Notification.permission !== 'granted') {
+      alert("Permission not granted. Please enable notifications in your browser settings.");
+    } else {
+      alert("Failed to schedule: " + (err.message || err));
+    }
   }
 };
 
