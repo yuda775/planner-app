@@ -194,16 +194,20 @@ const deleteTodo = async (todo) => {
 // Reminder Logic
 const openReminderModal = (todo) => {
   selectedTodo.value = todo;
-  // Pre-fill date if exists
+
+  let date;
   if (todo.reminderTime) {
-    const date = new Date(todo.reminderTime);
-    // Format for datetime-local: YYYY-MM-DDThh:mm
-    const offset = date.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(date - offset)).toISOString().slice(0, 16);
-    reminderDate.value = localISOTime;
+    date = new Date(todo.reminderTime);
   } else {
-    reminderDate.value = '';
+    // Default to current time if no reminder set
+    date = new Date();
   }
+
+  // Format for datetime-local: YYYY-MM-DDThh:mm
+  const offset = date.getTimezoneOffset() * 60000;
+  const localISOTime = (new Date(date - offset)).toISOString().slice(0, 16);
+  reminderDate.value = localISOTime;
+
   showModal.value = true;
 };
 
@@ -218,9 +222,13 @@ const saveReminder = async () => {
 
   const rawTodo = toRaw(selectedTodo.value);
   const triggerTime = new Date(reminderDate.value).getTime();
-  const now = Date.now();
 
-  if (triggerTime <= now) {
+  // Create a "now" date with seconds/ms stripped for fair comparison
+  const now = new Date();
+  now.setSeconds(0, 0);
+  const nowTime = now.getTime();
+
+  if (triggerTime < nowTime) {
     alert("Please select a future time");
     return;
   }
